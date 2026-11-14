@@ -1,0 +1,12 @@
+name: petsird_validation
+channels:
+  - conda-forge
+dependencies:
+  - bash-completion>=2.11
+  - cmake>=3.21.3
+  - cxx-compiler
+  - petsird=0.13.1
+  - libpetsird=0.13.1
+  - just=1.36.0
+  - ninja>=1.11.0
+  - shellcheck>=0.8.0
