@@ -1,14 +1,13 @@
 // Per-frame activity of singles units ("buckets") and per-crystal alive-time fractions from a PETSIRD file written by
 // STIR_PETSIRD_convertor. Same structure as petsird_analysis.cpp: read the header, then loop over the time blocks.
 //
-// Usage:  petsird_bucket file.petsird frame_length_s n_frames dtp [module ...]
+// Usage:  petsird_bucket file.petsird frame_length_s n_frames [module ...]
 //
 //   with modules   one group made of exactly those modules (e.g. bucket 76 = modules 322 and 330)
 //   without        every bucket is its own group: one row per frame and bucket is written
 #include "petsird/binary/protocols.h"
 #include "petsird_helpers.h"
 #include <algorithm>
-#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
@@ -21,18 +20,17 @@ static const int TRANSAXIAL_BLOCKS_PER_BUCKET = 2; // modules around the ring th
 int
 main(int argc, char const* argv[])
 {
-  if (argc < 5)
+  if (argc < 4)
     {
-      std::cerr << "Usage: " << argv[0] << " file.petsird frame_length_s n_frames dtp [module ...]\n"
+      std::cerr << "Usage: " << argv[0] << " file.petsird frame_length_s n_frames [module ...]\n"
                 << "       without modules, every bucket is written\n";
       return EXIT_FAILURE;
     }
   const std::string filename = argv[1];
   const double frame_length_ms = 1000.0 * std::atof(argv[2]);
   const int n_frames = std::atoi(argv[3]);
-  const double dtp = std::atof(argv[4]);
   std::vector<int> given_modules;
-  for (int i = 5; i < argc; ++i)
+  for (int i = 4; i < argc; ++i)
     given_modules.push_back(std::atoi(argv[i]));
 
   petsird::Header header;
@@ -231,7 +229,7 @@ main(int argc, char const* argv[])
     std::cout << "frame,bucket,transaxial,axial,";
   else
     std::cout << "frame,";
-  std::cout << "prompts,delayeds,mean_alive,alive_min,alive_max,mean_rate,dead_time_blocks,prompts_pair,delayeds_pair,"
+  std::cout << "prompts,delayeds,mean_alive,alive_min,alive_max,dead_time_blocks,prompts_pair,delayeds_pair,"
                "mean_partner_alive\n";
 
   for (int f = 0; f < n_frames; ++f)
@@ -254,9 +252,9 @@ main(int argc, char const* argv[])
           std::cout << f + 1 << ",";
           if (all_buckets)
             std::cout << g << "," << g % n_trans_buckets << "," << g / n_trans_buckets << ",";
-          std::cout << prompts[i] << "," << delayeds[i] << "," << a_mean << "," << a_min << "," << a_max << ","
-                    << 2.0 * std::log(a_mean) / dtp << "," << n_dead[f] << "," << prompts_pair[i] << "," << delayeds_pair[i]
-                    << "," << (net_sum[i] != 0 ? net_alive[i] / net_sum[i] : 0.0) << "\n";
+          std::cout << prompts[i] << "," << delayeds[i] << "," << a_mean << "," << a_min << "," << a_max << "," << n_dead[f]
+                    << "," << prompts_pair[i] << "," << delayeds_pair[i] << ","
+                    << (net_sum[i] != 0 ? net_alive[i] / net_sum[i] : 0.0) << "\n";
         }
     }
   return EXIT_SUCCESS;
