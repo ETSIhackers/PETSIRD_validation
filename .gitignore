@@ -15,3 +15,17 @@ __pycache__/
 \#*
 *#
 .#*
+
+# macOS
+.DS_Store
+
+# Python build and test artifacts
+*.egg-info/
+.pytest_cache/
+/python/dist/
+
+# PETSIRD data files (keep large scans out of the repo)
+*.petsird
+*.petsirdbin
+*.petsirdhdf5
+*.ndjson

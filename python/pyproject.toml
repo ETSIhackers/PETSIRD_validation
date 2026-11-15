@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "petsird-validation"
+version = "0.1.0"
+description = "Check PETSIRD files against the constraints documented in the PETSIRD model"
+authors = [{ name = "Hong Phuc Vo" }]
+requires-python = ">=3.10"
+dependencies = ["petsird>=0.13", "numpy"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+petsird-validator = "petsird_validation.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["petsird_validation*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.bandit]
+exclude_dirs = ["tests"]
