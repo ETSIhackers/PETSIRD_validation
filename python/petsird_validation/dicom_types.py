@@ -68,6 +68,28 @@ def _records(root, record_name):
             stack.append((child_path, value))
 
 
+def _exam_records(header: petsird.Header, field: str, name: str):
+    """Yield (path, record) for the DICOM record(s) in header.exam.<field>.
+
+    `name` is the field name in the model, used in messages. A list field
+    (radiopharmaceuticals) yields one record per item.
+    """
+    exam = header.exam
+    if exam is None:
+        return
+    value = getattr(exam, field)
+    if isinstance(value, list):
+        for k, record in enumerate(value):
+            yield f"exam.{name}[{k}]", record
+    elif value is not None:
+        yield f"exam.{name}", value
+
+
+def _time(value):
+    """A comparable form of a yardl DateTime (which has no `<` itself)."""
+    return getattr(value, "numpy_value", value)
+
+
 def _finite_nonnegative(value, name):
     """Check a numeric value is finite and non-negative."""
     try:
@@ -111,7 +133,7 @@ def _validate_code_sequence(code, name):
 
 def validate_patient_information(header: petsird.Header):
     """Validate DICOM patient information."""
-    for path, patient in _records(header, "dicom_patient_information"):
+    for path, patient in _exam_records(header, "patient", "patient"):
         sex = _field(patient, "patients_sex")
 
         if sex is not None and sex not in _ALLOWED_SEX:
@@ -131,8 +153,8 @@ def validate_patient_information(header: petsird.Header):
 
 def validate_patient_orientation(header: petsird.Header):
     """Validate DICOM patient orientation code sequences."""
-    for path, orientation in _records(header,
-                                      "dicom_patient_orientation_information"):
+    for path, orientation in _exam_records(header, "patient_orientation",
+                                           "patientOrientation"):
         for field in (
                 "patient_orientation_code_sequence",
                 "patient_orientation_modifier_code_sequence",
@@ -146,8 +168,8 @@ def validate_patient_orientation(header: petsird.Header):
 
 def validate_radiopharmaceutical_information(header: petsird.Header, ):
     """Validate DICOM radiopharmaceutical information."""
-    for path, radiopharm in _records(header,
-                                     "dicom_radiopharmaceutical_information"):
+    for path, radiopharm in _exam_records(header, "radiopharmaceuticals",
+                                          "radiopharmaceuticals"):
         for field in (
                 "radiopharmaceutical_volume",
                 "radionuclide_total_dose",
@@ -169,7 +191,7 @@ def validate_radiopharmaceutical_information(header: petsird.Header, ):
 
         if start is not None and stop is not None:
             try:
-                invalid = stop < start
+                invalid = _time(stop) < _time(start)
             except (TypeError, ValueError) as exc:
                 raise ValueError(f"{path}: incompatible administration "
                                  "start and stop times") from exc

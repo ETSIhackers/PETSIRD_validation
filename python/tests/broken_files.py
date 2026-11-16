@@ -16,6 +16,7 @@ folder, for example to try `petsird-validator` on them by hand:
 #  Author: Claude (Anthropic AI assistant), not yet reviewed by a person
 
 import argparse
+import datetime
 import math
 import pathlib
 from collections.abc import Callable
@@ -42,6 +43,8 @@ LYSO = ((175, 71, 0.714), (89, 39, 0.040), (28, 14, 0.064), (16, 8, 0.182))
 TUNGSTEN = ((184, 74, 1.0), )
 # The external signal declared in the exam and stored in the stream.
 SIGNAL_ID = 7
+# Root of the DICOM UIDs in the exam (an example root, not a registered one).
+UID_ROOT = "1.2.826.0.1.3680043.10.999"
 # Event blocks are 1 ms long; there are 2 of them, covering [0, 2) ms.
 EVENT_BLOCK_MS = 1
 NUM_EVENT_BLOCKS = 2
@@ -182,12 +185,52 @@ def make_header() -> petsird.Header:
         singles_histogram_energy_bin_edges=[bin_edges(400, 650)] * NUM_TYPES,
     )
     scanner.detection_efficiencies = make_detection_efficiencies(scanner)
-    signal = petsird.ExternalSignal(id=SIGNAL_ID,
-                                    description="respiratory trace")
-    exam = petsird.ExamInformation(modality="PT", external_signals=[signal])
-    return petsird.Header(exam=exam,
+    return petsird.Header(exam=make_exam(),
                           scanner=scanner,
                           contains_weighted_event_time_blocks=False)
+
+
+def code(value: str, meaning: str, scheme: str = "SCT"):
+    return petsird.DICOMBasicCodeSequence(code_value=value,
+                                          coding_scheme_designator=scheme,
+                                          code_meaning=meaning)
+
+
+def date_time(hour: int, minute: int) -> petsird.DateTime:
+    return petsird.DateTime.from_datetime(
+        datetime.datetime(2026, 11, 16, hour, minute))
+
+
+def make_exam() -> petsird.ExamInformation:
+    """a PET exam with patient, orientation, one tracer and one signal"""
+    patient = petsird.DICOMPatientInformation(patient_id="test-001",
+                                              patients_sex="O",
+                                              patients_size=1.7,
+                                              patients_weight=70.0,
+                                              patients_body_mass_index=24.2)
+    orientation = petsird.DICOMPatientOrientationInformation(
+        patient_orientation_code_sequence=code("102538003", "recumbent"),
+        patient_orientation_modifier_code_sequence=code("40199007", "supine"),
+        patient_gantry_relationship_code_sequence=code("102540008",
+                                                       "headfirst"))
+    fdg = petsird.DICOMRadiopharmaceuticalInformation(
+        radiopharmaceutical_volume=5.0,
+        radiopharmaceutical_start_date_time=date_time(10, 0),
+        radiopharmaceutical_stop_date_time=date_time(10, 1),
+        radionuclide_total_dose=370.0,
+        radiopharmaceutical_administration_event_uid=f"{UID_ROOT}.1",
+        radiopharmaceutical_specific_activity=1.0e6,
+        radiopharmaceutical_code_sequence=code("35321007",
+                                               "Fluorodeoxyglucose F^18^"),
+        radionuclide_code_sequence=code("77004003", "^18^Fluorine"))
+    signal = petsird.ExternalSignal(id=SIGNAL_ID,
+                                    description="respiratory trace")
+    return petsird.ExamInformation(modality="PT",
+                                   study_instance_uid=f"{UID_ROOT}.2",
+                                   patient=patient,
+                                   patient_orientation=orientation,
+                                   radiopharmaceuticals=[fdg],
+                                   external_signals=[signal])
 
 
 # ---------------------------------------------------------------- time blocks
@@ -574,6 +617,51 @@ def nan_detection_bin_efficiency(data):
         match="moduleSinglesUnitIdxLUTs[0][1] is -2")
 def singles_unit_below_minus_one(data):
     data.header.scanner.module_singles_unit_idx_lu_ts[0][1] = -2
+
+
+# --- DICOMTypes.yml
+
+
+@broken("validate_patient_information",
+        match="exam.patient.patientsSex: invalid value 'X'")
+def invalid_patient_sex(data):
+    data.header.exam.patient.patients_sex = "X"
+
+
+@broken("validate_patient_information",
+        match="exam.patient.patients_weight must be finite and non-negative")
+def negative_patient_weight(data):
+    data.header.exam.patient.patients_weight = -70.0
+
+
+# Both checks look at the orientation code sequences.
+@broken("validate_patient_orientation",
+        "validate_dicom_code_sequences",
+        match="codingSchemeDesignator is required")
+def orientation_code_without_scheme(data):
+    orientation = data.header.exam.patient_orientation
+    orientation.patient_orientation_code_sequence.coding_scheme_designator = ""
+
+
+@broken("validate_radiopharmaceutical_information",
+        match="exam.radiopharmaceuticals[0]: radiopharmaceuticalStopDateTime "
+        "precedes")
+def radiopharmaceutical_stops_before_it_starts(data):
+    fdg = data.header.exam.radiopharmaceuticals[0]
+    fdg.radiopharmaceutical_stop_date_time = date_time(9, 59)
+
+
+@broken("validate_dicom_uid",
+        match="header.exam.study_instance_uid: invalid DICOM UID '1.2.abc'")
+def invalid_study_instance_uid(data):
+    data.header.exam.study_instance_uid = "1.2.abc"
+
+
+@broken("validate_dicom_code_sequences",
+        match="codeValue and codeValueURN must not both be populated")
+def radionuclide_code_value_and_urn(data):
+    fdg = data.header.exam.radiopharmaceuticals[0]
+    fdg.radionuclide_code_sequence.code_value_urn = "urn:example:f18"
 
 
 # --- ExamInformation.yml

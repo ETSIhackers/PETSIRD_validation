@@ -164,10 +164,13 @@ def model_file(check: Callable) -> str:
     """The model file a check belongs to, from its module name.
 
     For example petsird_validation.detector_information gives
-    DetectorInformation.yml.
+    DetectorInformation.yml, and dicom_types gives DICOMTypes.yml.
     """
+    acronyms = {"dicom": "DICOM"}
     module = check.__module__.rsplit(".", 1)[-1]
-    return "".join(part.capitalize() for part in module.split("_")) + ".yml"
+    return "".join(
+        acronyms.get(part, part.capitalize())
+        for part in module.split("_")) + ".yml"
 
 
 # ---------------------------------------------------------------- output

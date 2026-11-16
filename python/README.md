@@ -175,6 +175,16 @@ leaves out the efficiencies fails them.
 | --- | --- | --- | --- |
 | `validate_exam` | header | the `exam.externalSignals` ids are unique; warns if `modality` is not `PT` | `duplicate_external_signal_id` |
 
+### DICOMTypes.yml: `dicom_types.py`
+
+| Check | Runs on | Constraint | Broken test files |
+| --- | --- | --- | --- |
+| `validate_patient_information` | header | `exam.patient`: `patientsSex` is `M`, `F`, `O` or empty; `patientsSize`, `patientsWeight` and `patientsBodyMassIndex` are finite and at least 0 | `invalid_patient_sex`, `negative_patient_weight` |
+| `validate_patient_orientation` | header | the 3 code sequences of `exam.patientOrientation` are valid (see `validate_dicom_code_sequences`) | `orientation_code_without_scheme` |
+| `validate_radiopharmaceutical_information` | header | for each of `exam.radiopharmaceuticals`: volume, total dose and specific activity are finite and at least 0; the stop time is not before the start time; the administration event UID is a valid DICOM UID | `radiopharmaceutical_stops_before_it_starts` |
+| `validate_dicom_uid` | header | every field whose name ends in `uid` is empty or a valid DICOM UID: at most 64 characters, numbers separated by dots, no leading zeros | `invalid_study_instance_uid` |
+| `validate_dicom_code_sequences` | header | in every code sequence (patient orientation, radiopharmaceutical, radionuclide), `codeValue` and `codeValueURN` are not both set, and `codingSchemeDesignator` is set when `codeValue` is | `orientation_code_without_scheme`, `radionuclide_code_value_and_urn` |
+
 ### TimeFrameInformation.yml: `time_frame_information.py`
 
 | Check | Runs on | Constraint | Broken test files |

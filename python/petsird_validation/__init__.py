@@ -14,6 +14,7 @@ There is one module per file in PETSIRD's model/ folder. Implemented so far:
 - detection_efficiencies: model/DetectionEfficiencies.yml
 - singles_histograms: model/SinglesHistograms.yml
 - exam_information: model/ExamInformation.yml
+- dicom_types: model/DICOMTypes.yml
 - time_frame_information: model/TimeFrameInformation.yml
 - events: model/Events.yml
 - protocol: model/Protocol.yml
