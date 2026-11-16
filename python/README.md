@@ -67,6 +67,27 @@ names the model file and field it checks.
 `cli.py` holds the `petsird-validator` command and the `HEADER_CHECKS` list of
 checks it runs.
 
+## Tests
+
+```sh
+cd python
+pip install -e ".[test]"
+pytest
+```
+
+`tests/broken_files.py` builds a small valid scanner (2 module types) and
+broken copies of it. Each broken copy breaks one constraint. The tests write
+every copy to a PETSIRD file, run `petsird-validator` on it, and check that
+exactly the expected checks fail with the expected message. A test also
+fails if a check in `HEADER_CHECKS` has no broken file.
+
+To get the files and try them by hand:
+
+```sh
+python tests/broken_files.py broken/
+petsird-validator broken/broken_crystal_shifted_along_z.petsird
+```
+
 ## Adding checks for another model file
 
 1. Create a module named after the model file, for example
@@ -74,4 +95,7 @@ checks it runs.
 2. Write `validate_*(header)` functions that raise `ValueError` with a message
    saying what is wrong and where.
 3. Add them to `HEADER_CHECKS` in `cli.py`.
-4. Add a row to the table above.
+4. Add a broken file for each check in `tests/broken_files.py`: a function
+   decorated with `@broken("validate_...", match="...")` that breaks the valid
+   header.
+5. Add a row to the table above.
