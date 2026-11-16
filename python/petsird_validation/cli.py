@@ -5,7 +5,7 @@ Reads the header of a PETSIRD file and runs every validate function on it.
 Exit code: 0 = all checks pass, 1 = a check failed, 2 = the file can't be read.
 """
 #  Copyright (C) 2026 ETSI hackathon contributors
-#  Author: Hong Phuc Vo
+#  Author: Hong Phuc Vo, MAX TOUSS, Kathiresan Chandrasekaran
 
 import argparse
 import sys
@@ -21,6 +21,10 @@ from .geometry_information import (validate_box_shapes,
 from .material_information import (validate_material_fraction_count,
                                    validate_material_fraction_sum,
                                    validate_material_ids_unique)
+from .scanner_information import (validate_bin_edges, validate_collimator_type,
+                                  validate_scanner_array_dimensions,
+                                  validate_scanner_resolutions,
+                                  validate_singles_histogram_dimensions)
 
 HEADER_CHECKS = (
     validate_scanner_geometry,
@@ -32,6 +36,11 @@ HEADER_CHECKS = (
     validate_material_ids_unique,
     validate_material_fraction_count,
     validate_material_fraction_sum,
+    validate_bin_edges,
+    validate_scanner_array_dimensions,
+    validate_scanner_resolutions,
+    validate_singles_histogram_dimensions,
+    validate_collimator_type,
 )
 
 
