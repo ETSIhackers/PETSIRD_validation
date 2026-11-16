@@ -28,6 +28,7 @@ import petsird
 
 from .detection_efficiencies import detection_efficiencies_tests_suite
 from .detector_information import detector_information_tests_suite
+from .dicom_types import dicom_types_tests_suite
 from .events import events_tests_suite
 from .exam_information import exam_information_tests_suite
 from .geometry_information import geometry_information_tests_suite
@@ -59,6 +60,7 @@ TEST_SUITES = (
     time_frame_information_tests_suite,
     events_tests_suite,
     protocol_tests_suite,
+    dicom_types_tests_suite,
 )
 
 LEVELS = ("header", "all_block", "event_block", "block", "stream")

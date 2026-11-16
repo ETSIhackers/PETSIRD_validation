@@ -55,15 +55,15 @@ def validate_module_pair_sgid_dimensions(header: petsird.Header):
         ("modulePairEfficienciesVectors",
          efficiencies.module_pair_efficiencies_vectors),
     ):
-        if len(matrix) != n:
+        # To check: need to understand, validate that when n != 1
+        if n != 1 and len(matrix) != n:
             raise ValueError(
                 f"{name}: expected {n} module-type rows, got {len(matrix)}")
 
         for i, row in enumerate(matrix):
-            if len(row) not in (i + 1, n):
-                raise ValueError(
-                    f"{name}[{i}]: expected {i + 1} or {n} entries, "
-                    f"got {len(row)}")
+            if len(row) != i + 1:
+                raise ValueError(f"{name}[{i}]: expected {i + 1} entries, "
+                                 f"got {len(row)}")
 
 
 def validate_sgid_ranges(header: petsird.Header):
@@ -136,24 +136,24 @@ def validate_number_module_types_consistency(header: petsird.Header) -> None:
 
 
 detection_efficiencies_tests_suite = {
-    "detection bin efficiency dimensions": {
+    "Detection bin efficiency dimensions": {
         "func": validate_detection_bin_efficiency_dimensions,
-        "level": "header",
+        "level": "header"
     },
-    "number of module types": {
-        "func": validate_number_module_types_consistency,
-        "level": "header",
-    },
-    "module pair SGID dimensions": {
-        "func": validate_module_pair_sgid_dimensions,
-        "level": "header",
-    },
-    "SGID ranges": {
-        "func": validate_sgid_ranges,
-        "level": "header",
-    },
-    "efficiency values": {
+    "Efficiency values": {
         "func": validate_efficiency_values,
-        "level": "header",
+        "level": "header"
+    },
+    "Module pair sgid dimensions": {
+        "func": validate_module_pair_sgid_dimensions,
+        "level": "header"
+    },
+    "Number module types consistency": {
+        "func": validate_number_module_types_consistency,
+        "level": "header"
+    },
+    "Sgid ranges": {
+        "func": validate_sgid_ranges,
+        "level": "header"
     },
 }
