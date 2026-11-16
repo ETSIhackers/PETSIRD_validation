@@ -110,3 +110,27 @@ def validate_collimator_type(header: petsird.Header) -> None:
     if value not in ("NONE", "RING"):
         raise ValueError(
             f"collimatorType is {value!r}; expected 'NONE' or 'RING'")
+
+
+scanner_information_tests_suite = {
+    "bin edges": {
+        "func": validate_bin_edges,
+        "level": "header",
+    },
+    "scanner array dimensions": {
+        "func": validate_scanner_array_dimensions,
+        "level": "header",
+    },
+    "scanner resolutions": {
+        "func": validate_scanner_resolutions,
+        "level": "header",
+    },
+    "singles histogram dimensions": {
+        "func": validate_singles_histogram_dimensions,
+        "level": "header",
+    },
+    "collimator type": {
+        "func": validate_collimator_type,
+        "level": "header",
+    },
+}

@@ -94,3 +94,19 @@ def validate_material_ids(header: petsird.Header) -> None:
             raise ValueError(
                 f"{where} is {material_id}, but bulkMaterials ids "
                 f"are {sorted(known) if known else 'none'}")
+
+
+detector_information_tests_suite = {
+    "scanner geometry": {
+        "func": validate_scanner_geometry,
+        "level": "header",
+    },
+    "detecting elements": {
+        "func": validate_detecting_elements,
+        "level": "header",
+    },
+    "material IDs": {
+        "func": validate_material_ids,
+        "level": "header",
+    },
+}

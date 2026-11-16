@@ -63,3 +63,19 @@ def validate_material_fraction_sum(header: petsird.Header) -> None:
             raise ValueError(
                 f"bulkMaterials[{k}] ({material.name}): "
                 f"mass fractions sum to {total:.8f}, expected 1.0")
+
+
+material_information_tests_suite = {
+    "material IDs unique": {
+        "func": validate_material_ids_unique,
+        "level": "header",
+    },
+    "material fraction count": {
+        "func": validate_material_fraction_count,
+        "level": "header",
+    },
+    "material fraction sum": {
+        "func": validate_material_fraction_sum,
+        "level": "header",
+    },
+}

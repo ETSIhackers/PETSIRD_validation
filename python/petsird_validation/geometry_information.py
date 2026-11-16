@@ -160,3 +160,19 @@ def validate_transforms(header: petsird.Header) -> None:
                 f"{where}.object.nonDetectingElements[{k}].transforms")
     if header.scanner.gantry_alignment is not None:
         check_rigid([header.scanner.gantry_alignment], "gantryAlignment")
+
+
+geometry_information_tests_suite = {
+    "box shapes": {
+        "func": validate_box_shapes,
+        "level": "header",
+    },
+    "replicated objects": {
+        "func": validate_replicated_objects,
+        "level": "header",
+    },
+    "rigid transformations": {
+        "func": validate_transforms,
+        "level": "header",
+    },
+}
