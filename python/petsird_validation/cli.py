@@ -18,6 +18,9 @@ from .detector_information import (validate_detecting_elements,
 from .geometry_information import (validate_box_shapes,
                                    validate_replicated_objects,
                                    validate_transforms)
+from .material_information import (validate_material_fraction_count,
+                                   validate_material_fraction_sum,
+                                   validate_material_ids_unique)
 
 HEADER_CHECKS = (
     validate_scanner_geometry,
@@ -26,6 +29,9 @@ HEADER_CHECKS = (
     validate_box_shapes,
     validate_replicated_objects,
     validate_transforms,
+    validate_material_ids_unique,
+    validate_material_fraction_count,
+    validate_material_fraction_sum,
 )
 
 
