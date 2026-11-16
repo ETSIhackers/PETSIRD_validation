@@ -28,7 +28,10 @@ petsird-validator my_scan.petsird
 PASS validate_scanner_geometry
 PASS validate_detecting_elements
 FAIL validate_material_ids: scannerGeometry.replicatedModules[0].object.detectingElements.object.materialId is 1, but bulkMaterials ids are none
-1 of 3 checks failed
+PASS validate_box_shapes
+PASS validate_replicated_objects
+PASS validate_transforms
+1 of 6 checks failed
 ```
 
 Binary and NDJSON PETSIRD files are supported. HDF5 files are not, because
@@ -59,6 +62,7 @@ names the model file and field it checks.
 | Model file | Module | Checks |
 | --- | --- | --- |
 | `DetectorInformation.yml` | `detector_information.py` | `validate_scanner_geometry`: there is at least one module type<br>`validate_detecting_elements`: each crystal box lies along +x and contains (0,0,0), the average detection position<br>`validate_material_ids`: every `materialId` refers to an entry in `bulkMaterials` |
+| `GeometryInformation.yml` | `geometry_information.py` | `validate_box_shapes`: the front and back faces of every `BoxShape` are clockwise and start at their smallest corner (order z, y, x)<br>`validate_replicated_objects`: every `ReplicatedObject` has at least one transform<br>`validate_transforms`: every `RigidTransformation` (modules, elements, `gantryAlignment`) is rigid: orthonormal rotation with det +1 |
 
 `cli.py` holds the `petsird-validator` command and the `HEADER_CHECKS` list of
 checks it runs.

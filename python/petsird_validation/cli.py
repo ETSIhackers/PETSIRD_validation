@@ -15,11 +15,17 @@ import petsird
 from .detector_information import (validate_detecting_elements,
                                    validate_material_ids,
                                    validate_scanner_geometry)
+from .geometry_information import (validate_box_shapes,
+                                   validate_replicated_objects,
+                                   validate_transforms)
 
 HEADER_CHECKS = (
     validate_scanner_geometry,
     validate_detecting_elements,
     validate_material_ids,
+    validate_box_shapes,
+    validate_replicated_objects,
+    validate_transforms,
 )
 
 
